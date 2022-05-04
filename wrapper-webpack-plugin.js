@@ -1,5 +1,6 @@
 'use strict';
 
+const { Compilation } = require('webpack');
 const ModuleFilenameHelpers = require("webpack/lib/ModuleFilenameHelpers");
 
 class WrapperPlugin {
@@ -34,11 +35,11 @@ class WrapperPlugin {
 
 		compiler.hooks.compilation.tap('WrapperPlugin', (compilation) => {
 			if (this.afterOptimizations) {
-				compilation.hooks.afterOptimizeChunkAssets.tap('WrapperPlugin', (chunks) => {
+				compilation.hooks.processAssets.tap({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (chunks) => {
 					wrapChunks(compilation, chunks, footer, header);
 				});
 			} else {
-				compilation.hooks.optimizeChunkAssets.tapAsync('WrapperPlugin', (chunks, done) => {
+				compilation.hooks.processAssets.tapAsync({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (chunks, done) => {
 					wrapChunks(compilation, chunks, footer, header);
 					done();
 				});
