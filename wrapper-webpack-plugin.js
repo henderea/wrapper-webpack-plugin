@@ -35,12 +35,12 @@ class WrapperPlugin {
 
 		compiler.hooks.compilation.tap('WrapperPlugin', (compilation) => {
 			if (this.afterOptimizations) {
-				compilation.hooks.processAssets.tap({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (chunks) => {
-					wrapChunks(compilation, chunks, footer, header);
+				compilation.hooks.processAssets.tap({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (assets) => {
+					wrapChunks(compilation, Object.entries(assets), footer, header);
 				});
 			} else {
-				compilation.hooks.processAssets.tapAsync({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (chunks, done) => {
-					wrapChunks(compilation, chunks, footer, header);
+				compilation.hooks.processAssets.tapAsync({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (assets, done) => {
+					wrapChunks(compilation, Object.entries(assets), footer, header);
 					done();
 				});
 			}
