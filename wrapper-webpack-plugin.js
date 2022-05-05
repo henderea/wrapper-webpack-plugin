@@ -58,7 +58,7 @@ class WrapperPlugin {
 		}
 
 		function wrapChunks(compilation, assets) {
-			for (const fileName of assets) {
+			for (const fileName of Object.keys(assets)) {
                 // if (!chunk.rendered) {
 				// 	// Skip already rendered (cached) chunks
 				// 	// to avoid rebuilding unchanged code.
