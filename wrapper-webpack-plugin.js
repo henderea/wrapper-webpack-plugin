@@ -36,44 +36,38 @@ class WrapperPlugin {
 		compiler.hooks.compilation.tap('WrapperPlugin', (compilation) => {
 			if (this.afterOptimizations) {
 				compilation.hooks.processAssets.tap({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (assets) => {
-					wrapChunks(compilation, Object.entries(assets), footer, header);
+					wrapChunks(compilation, assets, footer, header);
 				});
 			} else {
 				compilation.hooks.processAssets.tapAsync({ name: 'WrapperPlugin', stage: Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE }, (assets, done) => {
-					wrapChunks(compilation, Object.entries(assets), footer, header);
+					wrapChunks(compilation, assets, footer, header);
 					done();
 				});
 			}
 		});
 
-		function wrapFile(compilation, fileName, chunkHash) {
-			const headerContent = (typeof header === 'function') ? header(fileName, chunkHash) : header;
-			const footerContent = (typeof footer === 'function') ? footer(fileName, chunkHash) : footer;
+		function wrapFile(compilation, assets, fileName) {
+			const headerContent = (typeof header === 'function') ? header(fileName) : header;
+			const footerContent = (typeof footer === 'function') ? footer(fileName) : footer;
 
-			compilation.assets[fileName] = new ConcatSource(
+			assets[fileName] = new ConcatSource(
 				String(headerContent),
-				compilation.assets[fileName],
+				assets[fileName],
 				String(footerContent),
 			);
 		}
 
-		function wrapChunks(compilation, chunks) {
-			for (const chunk of chunks) {
-				if (!chunk.rendered) {
-					// Skip already rendered (cached) chunks
-					// to avoid rebuilding unchanged code.
-					continue;
-				}
+		function wrapChunks(compilation, assets) {
+			for (const fileName of assets) {
+                // if (!chunk.rendered) {
+				// 	// Skip already rendered (cached) chunks
+				// 	// to avoid rebuilding unchanged code.
+				// 	continue;
+				// }
 
-				const args = {
-					hash: compilation.hash,
-					chunkhash: chunk.hash,
-				};
-				for (const fileName of chunk.files) {
-					if (ModuleFilenameHelpers.matchObject(tester, fileName)) {
-						wrapFile(compilation, fileName, args);
-					}
-				}
+                if (ModuleFilenameHelpers.matchObject(tester, fileName)) {
+                    wrapFile(compilation, assets, fileName);
+                }
 			}
 		} // wrapChunks
 	}
